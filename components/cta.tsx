@@ -1,16 +1,79 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Mail, Phone, MapPin } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
+const contactSchema = z.object({
+  name: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
+  company: z.string().optional(),
+  email: z.string().email("Email invalide"),
+  need: z.string().optional(),
+  message: z.string().min(10, "Le message doit contenir au moins 10 caractères"),
+});
+
+type ContactFormData = z.infer<typeof contactSchema>;
+
 export function CTA() {
   const container = useRef<HTMLElement>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isValid },
+    reset,
+  } = useForm<ContactFormData>({
+    resolver: zodResolver(contactSchema),
+    mode: "onChange",
+  });
+
+  const onSubmit = async (data: ContactFormData) => {
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        toast({
+          title: "Message envoyé !",
+          description: "Nous vous recontacterons sous 24h.",
+        });
+        reset();
+      } else {
+        toast({
+          title: "Erreur",
+          description: result.error || "Une erreur est survenue.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Form submission error:', error);
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue. Réessayez.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   useGSAP(
     () => {
@@ -130,7 +193,7 @@ export function CTA() {
               Nous revenons vers vous sous 24h.
             </p>
 
-            <form className="mt-8 flex flex-col gap-5">
+            <form onSubmit={handleSubmit(onSubmit)} className="mt-8 flex flex-col gap-5">
               <div className="grid gap-5 sm:grid-cols-2">
                 <div>
                   <label
@@ -143,8 +206,12 @@ export function CTA() {
                     id="name"
                     type="text"
                     placeholder="Jean Dupont"
+                    {...register("name")}
                     className="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                   />
+                  {errors.name && (
+                    <p className="text-xs text-red-500">{errors.name.message}</p>
+                  )}
                 </div>
                 <div>
                   <label
@@ -157,6 +224,7 @@ export function CTA() {
                     id="company"
                     type="text"
                     placeholder="Votre entreprise"
+                    {...register("company")}
                     className="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                   />
                 </div>
@@ -172,8 +240,12 @@ export function CTA() {
                   id="email"
                   type="email"
                   placeholder="jean@entreprise.com"
+                  {...register("email")}
                   className="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                 />
+                {errors.email && (
+                  <p className="text-xs text-red-500">{errors.email.message}</p>
+                )}
               </div>
               <div>
                 <label
@@ -184,6 +256,7 @@ export function CTA() {
                 </label>
                 <select
                   id="need"
+                  {...register("need")}
                   className="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                 >
                   <option value="">Selectionnez un besoin</option>
@@ -207,11 +280,15 @@ export function CTA() {
                   id="message"
                   rows={4}
                   placeholder="Decrivez votre besoin, les competences recherchees, la duree de la mission..."
+                  {...register("message")}
                   className="w-full resize-none rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                 />
+                {errors.message && (
+                  <p className="text-xs text-red-500">{errors.message.message}</p>
+                )}
               </div>
-              <Button type="submit" className="gap-2">
-                Envoyer ma demande
+              <Button type="submit" disabled={!isValid || isSubmitting} className="gap-2">
+                {isSubmitting ? "Envoi en cours..." : "Envoyer ma demande"}
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </form>

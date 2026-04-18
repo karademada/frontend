@@ -1,6 +1,7 @@
 import React from "react"
 import type { Metadata, Viewport } from "next";
 import { Plus_Jakarta_Sans, Sora } from "next/font/google";
+import { Toaster } from "@/components/ui/toaster";
 
 import "./globals.css";
 
@@ -31,7 +32,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr">
-      <body className="font-sans antialiased">{children}</body>
+      <body className="font-sans antialiased">
+        {children}
+        <Toaster />
+      </body>
     </html>
   );
 }
