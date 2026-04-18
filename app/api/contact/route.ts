@@ -17,7 +17,7 @@ export const POST = async (request: NextRequest) => {
     }
 
     const { data, error } = await resend.emails.send({
-      from: 'GNTR Contact <onboarding@resend.dev>',
+      from: 'GNTR Contact <contact@gntrconsulting.fr>',
       to: 'contact@gntrconsulting.fr',
       replyTo: email,
       subject: `Nouveau contact: ${need || 'Demande générale'}`,
