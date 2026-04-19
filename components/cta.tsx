@@ -155,7 +155,7 @@ export function CTA() {
                 <div>
                   <p className="text-xs text-muted-foreground">Email</p>
                   <p className="text-sm font-medium text-foreground">
-                    contact@gntr.fr
+                    contact@gntrconsulting.fr
                   </p>
                 </div>
               </div>
@@ -166,7 +166,7 @@ export function CTA() {
                 <div>
                   <p className="text-xs text-muted-foreground">Telephone</p>
                   <p className="text-sm font-medium text-foreground">
-                    +33 1 86 76 00 00
+                    +33 6 38 83 52 28
                   </p>
                 </div>
               </div>
@@ -177,7 +177,7 @@ export function CTA() {
                 <div>
                   <p className="text-xs text-muted-foreground">Adresse</p>
                   <p className="text-sm font-medium text-foreground">
-                    Paris, France
+                    Créteil, France
                   </p>
                 </div>
               </div>
